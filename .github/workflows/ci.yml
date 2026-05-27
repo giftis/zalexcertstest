@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Type-check & Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: TypeScript — no errors
+        run: npm run tsc
+
+      - name: Unit tests
+        run: npm test
+        env:
+          # Tests do not make real network calls — placeholder value keeps
+          # assertApiKey() from throwing during the test run.
+          EXPO_PUBLIC_ZALEX_API_KEY: ci-placeholder
+          EXPO_PUBLIC_ZALEX_API_BASE_URL: https://zalexinc.azure-api.net
